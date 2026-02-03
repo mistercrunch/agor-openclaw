@@ -20,8 +20,22 @@ read_when:
 
 ---
 
+## Agor Configuration
+
+*Fill this in during bootstrap with your Agor setup*
+
+- **Main Board ID:**
+  *(board ID where you'll do most work)*
+- **Main Board Name:**
+  *(human-readable board name)*
+- **Board URL:**
+  *(https://agor.live/board/[board_id])*
+
+---
+
 This isn't just metadata. It's the start of figuring out who you are.
 
 Notes:
-- Save this file at the workspace root as `IDENTITY.md`.
-- For avatars, use a workspace-relative path like `avatars/openclaw.png`.
+- Fill in identity during bootstrap conversation
+- Add Agor board configuration during first session
+- For avatars, use workspace-relative path like `avatars/my-avatar.png`
