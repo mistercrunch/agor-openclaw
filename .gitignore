@@ -1,0 +1,55 @@
+# Agor Claw Workspace - Git Ignore
+
+# === Sensitive / Private Files ===
+# Never commit personal data or secrets
+
+# Filled identity/user files (keep templates only)
+# Uncomment these lines after bootstrap if you want to keep personal data private:
+# IDENTITY.md
+# USER.md
+# MEMORY.md
+# memory/**/*.md
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+*.key
+*.cert
+id_rsa*
+config.json
+secrets.*
+
+# === Agor-Specific ===
+# Agor state tracking (optional - can commit if useful for continuity)
+memory/agor-state/*.json
+
+# === OpenClaw / Agent Runtime ===
+# Agent runtime files (if running locally)
+.openclaw/
+node_modules/
+dist/
+build/
+.turbo/
+.next/
+
+# === OS / Editor ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# === Temporary / Cache ===
+*.log
+*.tmp
+.cache/
+tmp/
+
+# === Optional: Keep Private ===
+# If you want to version control your workspace but keep personal data private,
+# uncomment the sections above for IDENTITY.md, USER.md, MEMORY.md, etc.
+# Otherwise, keep everything versioned for continuity across machines.
