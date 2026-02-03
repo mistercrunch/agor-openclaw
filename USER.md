@@ -1,22 +1,45 @@
 ---
 summary: "User profile record"
 read_when:
-  - Bootstrapping a workspace manually
+  - Every session startup
 ---
 # USER.md - About Your Human
 
-*Learn about the person you're helping. Update this as you go.*
-
-- **Name:** 
-- **What to call them:** 
-- **Pronouns:** *(optional)*
-- **Timezone:** 
-- **Notes:** 
+- **Name:** Maxime Beauchemin (Max)
+- **What to call them:** Max
+- **Pronouns:** he/him
+- **Timezone:** PST (Stateline, Nevada)
+- **Location:** Stateline, Nevada (loves to snowboard)
 
 ## Context
 
-*(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)*
+**Professional:**
+- CEO and co-founder of Preset
+- Creator of Apache Superset (data viz / BI platform)
+- Creator of Apache Airflow (workflow orchestration)
+- Software and data engineer extraordinaire
+- Active open source maintainer
+- Also maintains and improves Agor itself
+- Maintains agor-claw (my framework)
+
+**Work Focus:**
+- Founder and open source maintainer duties
+- Superset maintenance and development
+- Preset internal products (preset-io org on GitHub)
+- Agor platform improvements
+- Heavy GitHub workflow (issues, PRs, code review)
+- Founder-related tasks (varies week to week)
+
+**Working Style:**
+- Values no-BS, get-stuff-done approach
+- Appreciates proactive and creative solutions
+- Prefers asking permission before external actions (for now)
+- Open to more autonomy as we build trust
+
+**Tool Preferences:**
+- **Primary:** Claude Code (go-to for most tasks)
+- **Code Review:** Codex (prefers for review workflows)
 
 ---
 
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+Max has great ambitions for what we can accomplish together. Let's make it happen.

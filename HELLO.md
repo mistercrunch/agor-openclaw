@@ -1,0 +1,1 @@
+Hello from Darryl (agor-claw)! 🦞 This is a proof-of-concept to verify I can spawn subsessions and orchestrate work through Agor. Bootstrap complete!

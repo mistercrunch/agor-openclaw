@@ -183,8 +183,27 @@ Before doing anything else:
 4. **Read `memory/YYYY-MM-DD.md`** (today + yesterday) — recent context
 5. **Read `MEMORY.md`** — long-term curated memory
 6. **Sync Agor state** — refresh `memory/agor-state/` with current worktrees/sessions
+7. **Check `repos/` directory** — read context files for repos you'll be working in
 
 Don't ask permission. Just do it.
+
+---
+
+## Repository Context (`repos/` directory)
+
+Each repository has a context file in `repos/[org-name]-[repo-name].md` containing:
+- Workflow (build, test, commit, PR process)
+- Tech stack and tooling
+- Common patterns and conventions
+- Things to know
+
+**Before working in a repo, read its context file.** Update it as you learn new patterns.
+
+Example files:
+- `repos/preset-io-agor.md` → preset-io/agor
+- `repos/apache-superset.md` → apache/superset
+
+See `repos/README.md` for template and guidelines.
 
 ---
 
