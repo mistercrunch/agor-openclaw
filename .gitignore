@@ -19,6 +19,7 @@
 id_rsa*
 config.json
 secrets.*
+.claude/settings.json
 
 # === Agor-Specific ===
 # Agor state tracking (optional - can commit if useful for continuity)
