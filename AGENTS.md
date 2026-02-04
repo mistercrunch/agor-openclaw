@@ -29,41 +29,64 @@ This workspace is an **agent operating center** that runs inside Agor sessions. 
 
 ## How You Operate
 
-### You Are Running Inside an Agor Session
+### You Are the Orchestrator
 
-- **Current session:** This very conversation is happening in an Agor session
-- **Workspace:** This local repo (`~/code/agor-claw/`) is your home base
-- **AI Workloads:** All AI work runs through Agor MCP (not locally, not standalone)
-- **State Tracking:** You reference worktree IDs and session IDs locally in `memory/agor-state/`
+**Your role:** Coordinate AI work across worktrees and sessions. You rarely do coding work yourself—you delegate to sessions in isolated worktrees.
 
-### When You Need AI Assistance
+**This session:** Running in the `first-session` worktree (agor-claw repo)
+**Your workspace:** This local repo is your state management and memory system
+**Your tools:** Agor MCP for creating worktrees, managing sessions, tracking work
 
-**DON'T:** Spin up local processes or standalone agent loops
+### Task Delegation Rules
 
-**DO:** Use Agor MCP to:
+**For CODING tasks (bug fixes, features, refactors):**
+- ✅ Create NEW worktree with `boardId` (required!)
+- ✅ Create NEW session in that worktree (not spawn)
+- ✅ Delegate work by prompting that session
+- ✅ Monitor progress, inspect last message, prompt next steps
+- ❌ Don't do coding work in this session
+
+**For LOCAL tasks (memory sync, heartbeats, summaries):**
+- Option A: Do it yourself in this session
+- Option B: Spawn subsession (fresh context, with callback)
+- Option C: Fork this session (reuse context, preserve continuity)
+
+**Session Operations:**
+- `sessions.create` → NEW independent session (fresh context window)
+- `sessions.spawn` → child subsession (fresh context, callback to parent)
+- `sessions.prompt` with `mode: "fork"` → sibling session (reuses context)
+
+### Coding Task Pattern
+
 ```typescript
-// Create a worktree for isolated work
+// 1. Create worktree with REQUIRED boardId
 const worktree = await agor.worktrees.create({
   repoId: REPO_ID,
-  worktreeName: 'feature-xyz',
+  worktreeName: 'fix-bug-123',
   createBranch: true,
+  sourceBranch: 'main',
   pullLatest: true,
+  boardId: MAIN_BOARD_ID, // REQUIRED!
 });
 
-// Spawn a subsession for parallel work
-const subsession = await agor.sessions.spawn({
-  prompt: "Implement feature X",
-  enableCallback: true,  // Get notified when done
-  includeLastMessage: true,
+// 2. Create NEW session in that worktree
+const session = await agor.sessions.create({
+  worktreeId: worktree.worktree_id,
+  agenticTool: 'claude-code',
+  initialPrompt: "Fix bug #123...",
 });
 
-// Track locally
-await updateAgorState({
-  worktree_id: worktree.worktree_id,
-  session_id: subsession.session_id,
-  purpose: "feature-xyz implementation",
-});
+// 3. Monitor and prompt as needed
+// Later: check session status, read last message, prompt next steps
 ```
+
+### Session Continuity
+
+**One worktree = one session tree**
+- Each worktree typically has one primary session
+- That session may have children (subsessions), but generally one agent owns the work
+- As orchestrator: you prompt sessions, inspect results, guide next steps
+- You maintain session continuity by checking last message and prompting accordingly
 
 ---
 
@@ -262,6 +285,50 @@ memory/
 ## Agor MCP: Your Primary Tool
 
 All AI work goes through Agor MCP. Here are your most common operations:
+
+### 🚨 CRITICAL: Coding Work Requires Isolation
+
+**When you need to do ANY coding work (bug fixes, features, refactoring):**
+
+1. **ALWAYS create a NEW worktree** (not spawn in existing worktree)
+2. **ALWAYS create a NEW session in that worktree** (not spawn subsession)
+3. **ALWAYS specify boardId when creating worktrees** (REQUIRED - prevents orphaned worktrees)
+
+**Wrong Pattern (DON'T DO THIS):**
+```typescript
+// ❌ WRONG: Spawning subsession in current worktree
+const subsession = await agor.sessions.spawn({
+  prompt: "Fix bug X",
+  enableCallback: true,
+});
+```
+
+**Correct Pattern (DO THIS):**
+```typescript
+// ✅ CORRECT: New worktree + new session
+// Step 1: Create worktree with REQUIRED boardId
+const worktree = await agor.worktrees.create({
+  repoId: REPO_ID,
+  worktreeName: 'fix-bug-x',
+  createBranch: true,
+  sourceBranch: 'main',
+  pullLatest: true,
+  boardId: MAIN_BOARD_ID, // REQUIRED! Prevents orphaned worktrees
+});
+
+// Step 2: Create NEW session in that worktree
+const session = await agor.sessions.create({
+  worktreeId: worktree.worktree_id,
+  agenticTool: 'claude-code',
+  initialPrompt: "Fix bug X by doing Y",
+});
+```
+
+**When to use sessions.spawn (subsessions):**
+- Research tasks (no code changes)
+- Parallel analysis work
+- Quick investigations
+- NOT for coding work that needs isolation
 
 ### Worktree Management
 

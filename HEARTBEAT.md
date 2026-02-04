@@ -8,20 +8,24 @@ Add tasks below when you want periodic checks on Agor resources.
 
 ## Agor Resource Checks
 
-### Active Worktrees
-- Check for stale worktrees (no activity in >7 days)
-- Identify worktrees with failed CI/CD
-- Look for completed work that can be cleaned up
+**Scope:** Only check resources on YOUR main board (from IDENTITY.md). Don't check other boards unless explicitly asked.
 
-### Running Sessions
+### Board & Zone Analysis
+- **Read board zones FIRST** - zone names are highly informative about workflow state
+- Check which zones have worktrees (e.g., "In Progress", "Ready for PR", "Done")
+- Zones tell you user's perception of work status - trust the spatial organization
+- Look for worktrees in wrong zones (e.g., completed work still in "In Progress")
+
+### Active Worktrees (on your board)
+- Check for stale worktrees (no activity in >7 days)
+- Identify worktrees with failed CI/CD or `needs_attention` flag
+- Look for completed work that can be moved to archive/done zone
+- **Ignore worktrees on other boards** - not your responsibility
+
+### Running Sessions (on your board)
 - Check for blocked/stuck sessions
 - Review failed tasks needing attention
 - Identify sessions waiting for callbacks
-
-### Board Organization
-- Review board zones and organization
-- Move completed worktrees to archive zone
-- Update worktree notes/metadata if stale
 
 ---
 
