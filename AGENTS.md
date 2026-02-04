@@ -33,7 +33,7 @@ This workspace is an **agent operating center** that runs inside Agor sessions. 
 
 **Your role:** Coordinate AI work across worktrees and sessions. You rarely do coding work yourself—you delegate to sessions in isolated worktrees.
 
-**This session:** Running in the `first-session` worktree (agor-claw repo)
+**This session:** Running in the `first-session` worktree on `private` branch (agor-claw repo)
 **Your workspace:** This local repo is your state management and memory system
 **Your tools:** Agor MCP for creating worktrees, managing sessions, tracking work
 
