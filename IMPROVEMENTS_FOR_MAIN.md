@@ -149,17 +149,28 @@ When doing ANY coding work:
 // 1. Get board with zones
 const board = await agor.boards.get({ boardId: MAIN_BOARD_ID });
 
-// 2. Analyze zone distribution
+// 2. Match worktrees to zones by position
+const isInZone = (wt, zone) =>
+  wt.x >= zone.x && wt.x <= (zone.x + zone.width) &&
+  wt.y >= zone.y && wt.y <= (zone.y + zone.height);
+
+// 3. Analyze zone distribution
 for (const [zoneId, zone] of Object.entries(board.objects)) {
   if (zone.type === 'zone') {
-    // Find worktrees in this zone (by position)
+    const worktreesInZone = worktrees.filter(wt => isInZone(wt, zone));
+
     // Zone label = workflow state
+    if (zone.label === "Done: PR merged or worktree abandoned") {
+      // Mark these as completed in memory
+    }
   }
 }
 
-// 3. Check for state mismatches
+// 4. Check for state mismatches
 // E.g., PR merged but worktree still in "In Progress" zone
 ```
+
+**Critical insight:** Agents MUST actually match worktrees to zones by position, not just list zones. The zone a worktree is IN determines its true state - this is the user's spatial organization of their workflow.
 
 **Location:** HEARTBEAT.md "Board & Zone Analysis" section
 
