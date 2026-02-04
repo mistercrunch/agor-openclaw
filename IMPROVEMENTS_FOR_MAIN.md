@@ -176,6 +176,84 @@ for (const [zoneId, zone] of Object.entries(board.objects)) {
 
 ---
 
+## 8. BOARD.md Framework File
+
+**Added:** New framework file for documenting board configuration and zone workflows
+
+**Purpose:** Provide structured place to document board setup, zone definitions, workflow transitions, and agent behavior expectations
+
+**Key concepts:**
+- Board ID and name reference
+- Zone definitions with workflow states
+- Agent behavior per zone
+- Workflow transition maps
+- Integration points for bootstrap and heartbeat
+
+**Why it matters:**
+- Agents need to understand spatial organization to act appropriately
+- Zones encode workflow state—agents must know what each zone means
+- Bootstrap needs guidance on setting up boards for new users
+- Heartbeat needs to know what actions to take based on zone placement
+- Centralizes board configuration instead of scattering across multiple files
+
+**Template structure:**
+```markdown
+## Board Information
+- Board ID, name, URL
+
+## Zones and Workflow
+- Zone definitions (ID, purpose, workflow state, agent behavior)
+- Zone triggers (if configured)
+- Workflow transition map
+
+## Agent Instructions
+- How to use zones in heartbeat checks
+- How to place worktrees for new work
+- Zone-based action rules
+```
+
+**Integration points:**
+
+1. **Bootstrap (BOOTSTRAP.md should reference this):**
+   - Help user create/choose board
+   - Optionally create standard zones (Design, In Progress, Ready for PR, Done, etc.)
+   - Fill in BOARD.md with zone IDs and definitions
+   - Record board ID in IDENTITY.md
+
+2. **Heartbeat (HEARTBEAT.md should read this):**
+   - Load BOARD.md to understand zone meanings
+   - Match worktrees to zones by position
+   - Take zone-specific actions (e.g., "Done" zone → mark completed in memory)
+   - Respect workflow states when reporting status
+
+3. **AGENTS.md (should reference BOARD.md):**
+   - "Read BOARD.md" added to "Every Session" checklist
+   - Mention zones when discussing worktree placement
+   - Reference BOARD.md for workflow understanding
+
+**File contents:**
+- Empty template by default (like HEARTBEAT.md)
+- Users fill in during bootstrap or as they create zones
+- Examples provided for common workflow patterns
+- Clear agent behavior expectations per zone
+
+**Example zone behavior:**
+- "Done" zone → mark completed, archive from tracking, don't report in heartbeats
+- "Ready for PR" zone → create PR if not exists, ensure CI passes
+- "In Progress" zone → active development, check for staleness
+- "Design!" zone → planning phase, don't start coding yet
+
+**Location:** New file: `BOARD_TEMPLATE_FOR_MAIN.md` (root of workspace, empty template for users)
+**Instance file:** `BOARD.md` (user fills in during bootstrap with actual board config)
+
+**Related improvements:**
+- Complements zone-aware heartbeat (#7)
+- Works with boardId requirement (#4)
+- Supports zone pinning feature (PR #538)
+- Enables zone triggers and automation
+
+---
+
 ## Implementation Plan
 
 When contributing these back to main:
