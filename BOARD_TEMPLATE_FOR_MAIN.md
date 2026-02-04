@@ -126,34 +126,25 @@ Design! → In Progress → Open a PR → Codex review → Human review → Done
 
 Zone information is now **directly available** in worktree MCP responses as `zone_id` and `zone_label` fields (no position calculations needed):
 
-```typescript
-// Get worktrees with zone info included
-const worktrees = await agor.worktrees.list();
+```
+Use agor_worktrees_list to get all worktrees.
+Each worktree includes zone_id and zone_label fields automatically.
 
-// Zone fields are already there!
-worktrees.data.forEach(wt => {
-  console.log(`${wt.name}: ${wt.zone_label}`); // e.g., "Done: PR merged"
-
-  // Take actions based on zone
-  if (wt.zone_label === "Done: PR merged or worktree abandoned") {
-    markCompleted(wt);
-  } else if (wt.zone_label === "Ready for PR" && !wt.pull_request_url) {
-    createPR(wt);
-  } else if (wt.zone_label === "In Progress" && isStale(wt.last_updated)) {
-    flagAsStale(wt);
-  }
-});
+Take actions based on zone_label:
+- "Done: PR merged or worktree abandoned" → Mark completed in memory, archive
+- "Ready for PR" + missing pull_request_url → Create PR
+- "In Progress" + stale last_updated → Flag for attention
 ```
 
 **Key points:**
-- Zone info is automatically included in `worktrees.get` and `worktrees.list`
-- No need to manually match positions or call `boards.get`
+- Zone info is automatically included in `agor_worktrees_get` and `agor_worktrees_list`
+- No need to manually match positions or call `agor_boards_get`
 - Trust `zone_label` as source of truth for workflow state
-- Use `worktrees.set_zone` to move worktrees between zones
+- Use `agor_worktrees_set_zone` to move worktrees between zones
 
 **For new work:**
-1. Create worktree with required `boardId`
-2. Use `worktrees.set_zone` to place in appropriate starting zone
+1. Create worktree with required `boardId` (use `agor_worktrees_create`)
+2. Use `agor_worktrees_set_zone` to place in appropriate starting zone
 3. Zone triggers may auto-start sessions (if configured)
 
 ---

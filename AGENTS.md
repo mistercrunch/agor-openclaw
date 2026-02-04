@@ -114,8 +114,8 @@ All your work should be **visible on a dedicated Agor board**. This ensures your
 > "What board should I do most of my work under?"
 
 **Then:**
-1. Check if board exists: `await agor.boards.list()`
-2. If not, create it: `await agor.boards.create({ name: 'agor-claw', ... })`
+1. Check if board exists (use agor_boards_list)
+2. If not, create it using agor_boards_create with name and optional icon/color
 3. Record board ID in `IDENTITY.md`:
    ```markdown
    ## Agor Configuration
@@ -140,7 +140,7 @@ All your work should be **visible on a dedicated Agor board**. This ensures your
 > "What repositories do you typically work on?"
 
 **Then:**
-1. Check if repos are set up in Agor: `await agor.repos.list()`
+1. Check if repos are set up in Agor (use agor_repos_list)
 2. Compare against user's answer
 3. For missing repos, ask:
    > "I don't see [repo-name] in Agor. Should I set it up for you?"
@@ -165,34 +165,21 @@ All your work should be **visible on a dedicated Agor board**. This ensures your
 After setting up your board and repos during bootstrap, demonstrate that Agor integration works:
 
 1. **Create a temporary worktree:**
-   ```typescript
-   const worktree = await agor.worktrees.create({
-     repoId: CONFIGURED_REPO_ID,
-     worktreeName: 'agor-claw-hello',
-     createBranch: true,
-   });
-   ```
+   - Use MCP tool: `agor_worktrees_create`
+   - Parameters: repoId (from configured repos), worktreeName='agor-claw-hello', createBranch=true, boardId (REQUIRED)
+   - Save the returned worktree_id
 
-2. **Spawn a simple session:**
-   ```typescript
-   const session = await agor.sessions.spawn({
-     prompt: "Create a file called HELLO.md with a greeting",
-     enableCallback: true,
-   });
-   ```
+2. **Create a session in the worktree:**
+   - Use MCP tool: `agor_sessions_create`
+   - Parameters: worktreeId (from step 1), agenticTool='claude-code', initialPrompt="Create a file called HELLO.md with a greeting"
+   - Save the returned session_id
 
 3. **Report to user:**
-   > "✅ POC complete! I created worktree `agor-claw-hello` and spawned session `[session_id]` to test the integration. You should see this on your board."
+   > "✅ POC complete! I created worktree `agor-claw-hello` (ID: [worktree_id]) and created session [session_id] to test the integration. You should see this on your board."
 
 4. **Track the POC:**
-   ```typescript
-   await updateDailyLog(`
-   ### POC: Agor Integration Test
-   - Created worktree: ${worktree.worktree_id}
-   - Spawned session: ${session.session_id}
-   - Status: Success
-   `);
-   ```
+   - Update today's daily log (memory/YYYY-MM-DD.md)
+   - Record: worktree_id, session_id, purpose="POC test", status="Success"
 
 ---
 

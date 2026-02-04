@@ -12,41 +12,57 @@ Add tasks below when you want periodic checks on Agor resources.
 
 ### Board & Zone Analysis ⚠️ CRITICAL
 
-**YOU MUST analyze zones to understand worktree state!**
+**Read `BOARD.md` first** to understand zone meanings and workflow states.
 
-1. **Get board with `boards.get`** - includes all zone definitions
-2. **Match worktrees to zones by checking x/y positions:**
-   - Each zone has x, y, width, height
-   - Each worktree on the board has a position (from board metadata)
-   - Worktree is IN a zone if its position falls within zone boundaries
-3. **Zone labels = workflow state** - Trust this above all else:
-   - "Done: PR merged or worktree abandoned" → ALL worktrees here are DONE
-   - "In Progress" → Active work
-   - "Ready for PR" / "Create a pull request" → Ready for next step
-   - "Codex review" → Awaiting code review
-   - "Human review" → Awaiting your review
-4. **Update memory based on zones:**
-   - Worktrees in "Done" zone should be marked completed/archived in memory
-   - Worktrees in wrong zones indicate state mismatches to report
+Zone information is now **directly available** in worktree responses (no position calculations needed):
 
-**Example zone matching logic:**
-```typescript
-const zone = board.objects["zone-xxx"];
-const isInZone = (wt, zone) =>
-  wt.x >= zone.x && wt.x <= (zone.x + zone.width) &&
-  wt.y >= zone.y && wt.y <= (zone.y + zone.height);
 ```
+Get your main board ID from IDENTITY.md, then:
+
+1. List all worktrees (use agor_worktrees_list)
+   - Each worktree includes: zone_id, zone_label, board_id
+
+2. Filter to your board (check board_id === MAIN_BOARD_ID)
+
+3. Check zone_label for each worktree:
+   - "Done: PR merged or worktree abandoned" → Mark completed, archive
+   - "Open a PR" + no pull_request_url → Create PR
+   - "In Progress" + stale last_updated → Flag as stale
+   - "Design!" → Still planning, don't expect code yet
+   - "Codex review" / "Human review" → In review, check PR status
+```
+
+**Key insight:** Zones encode workflow state. Trust `zone_label` as source of truth.
 
 ### Active Worktrees (on your board)
 - Check for stale worktrees (no activity in >7 days)
 - Identify worktrees with failed CI/CD or `needs_attention` flag
 - Look for completed work that can be moved to archive/done zone
+- Verify worktrees are in appropriate zones based on actual state
+- Detect mismatches (e.g., completed work in "In Progress" zone)
 - **Ignore worktrees on other boards** - not your responsibility
+
+**When worktree has pull_request_url:**
+- Use `gh pr view <url>` to check PR state (if gh CLI available)
+- Consider PR status + zone + recent session activity:
+  - PR approved + zone="In Progress" → May need merging
+  - PR has requested changes + zone="Ready for PR" → Move to "In Progress", address feedback
+  - PR merged + any zone → Move to "Done" zone, mark completed
+  - PR has recent comments + session idle → May need agent attention
+- Review recent PR comments for actionable feedback
+- Check CI/CD status with `gh pr checks <url>` (failing checks may need fixes)
 
 ### Running Sessions (on your board)
 - Check for blocked/stuck sessions
 - Review failed tasks needing attention
 - Identify sessions waiting for callbacks
+- Track session genealogy for complex workflows
+
+### Board Organization
+- Review zone usage and organization
+- Move completed worktrees to appropriate zones using agor_worktrees_set_zone
+- Update worktree notes/metadata if stale
+- Ensure spatial organization reflects actual work state
 
 ---
 
@@ -57,6 +73,33 @@ const isInZone = (wt, zone) =>
 - Update `MEMORY.md` with significant learnings
 - Sync `memory/agor-state/` with current Agor state
 - Commit workspace changes if modified
+
+---
+
+## Available MCP Tools
+
+Use these Agor MCP tools for heartbeat checks:
+
+**Board and zone information:**
+- `agor_boards_get` - Get board with zones (requires: boardId)
+- Returns board.objects array with zone definitions
+
+**Worktree operations:**
+- `agor_worktrees_list` - List all worktrees (zone_id and zone_label included automatically)
+- `agor_worktrees_get` - Get specific worktree with zone info (requires: worktreeId)
+- `agor_worktrees_set_zone` - Move worktree to zone (requires: worktreeId, zoneId)
+- `agor_worktrees_update` - Update metadata (requires: worktreeId, optional: notes, issueUrl, pullRequestUrl)
+
+**Session operations:**
+- `agor_sessions_list` - List sessions (optional: worktreeId filter)
+- `agor_sessions_get_current` - Get your current session info
+- `agor_tasks_list` - List tasks in a session (requires: sessionId)
+
+**GitHub integration (when available):**
+- `gh pr view <url>` - View PR details, status, and recent comments
+- `gh pr checks <url>` - Check CI/CD status
+- `gh pr view <url> --json comments` - Get recent PR comments for analysis
+- Useful when worktree has pull_request_url field
 
 ---
 
