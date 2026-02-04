@@ -123,18 +123,38 @@ Design! → In Progress → Open a PR → Codex review → Human review → Done
 ## Agent Instructions
 
 **For heartbeat checks:**
-1. Get board with `boards.get` to load all zones
-2. Match each worktree to its zone by x/y position
-3. Take actions based on zone + worktree state:
-   - Zone says "Done" → mark completed in memory
-   - Zone says "Ready for PR" + no PR → create PR
-   - Zone says "In Progress" + no activity in 7 days → flag as stale
-4. Trust zone labels as source of truth for workflow state
+
+Zone information is now **directly available** in worktree MCP responses as `zone_id` and `zone_label` fields (no position calculations needed):
+
+```typescript
+// Get worktrees with zone info included
+const worktrees = await agor.worktrees.list();
+
+// Zone fields are already there!
+worktrees.data.forEach(wt => {
+  console.log(`${wt.name}: ${wt.zone_label}`); // e.g., "Done: PR merged"
+
+  // Take actions based on zone
+  if (wt.zone_label === "Done: PR merged or worktree abandoned") {
+    markCompleted(wt);
+  } else if (wt.zone_label === "Ready for PR" && !wt.pull_request_url) {
+    createPR(wt);
+  } else if (wt.zone_label === "In Progress" && isStale(wt.last_updated)) {
+    flagAsStale(wt);
+  }
+});
+```
+
+**Key points:**
+- Zone info is automatically included in `worktrees.get` and `worktrees.list`
+- No need to manually match positions or call `boards.get`
+- Trust `zone_label` as source of truth for workflow state
+- Use `worktrees.set_zone` to move worktrees between zones
 
 **For new work:**
-1. Place worktrees in appropriate starting zone (usually "Design!" or "In Progress")
-2. Update zone position as work progresses
-3. Use zone triggers if configured for automated workflows
+1. Create worktree with required `boardId`
+2. Use `worktrees.set_zone` to place in appropriate starting zone
+3. Zone triggers may auto-start sessions (if configured)
 
 ---
 

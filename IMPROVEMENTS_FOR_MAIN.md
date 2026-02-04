@@ -144,33 +144,7 @@ When doing ANY coding work:
 - "Codex review" → Code review needed
 - "Human review" / "Trash" → Terminal states
 
-**Implementation:**
-```typescript
-// 1. Get board with zones
-const board = await agor.boards.get({ boardId: MAIN_BOARD_ID });
-
-// 2. Match worktrees to zones by position
-const isInZone = (wt, zone) =>
-  wt.x >= zone.x && wt.x <= (zone.x + zone.width) &&
-  wt.y >= zone.y && wt.y <= (zone.y + zone.height);
-
-// 3. Analyze zone distribution
-for (const [zoneId, zone] of Object.entries(board.objects)) {
-  if (zone.type === 'zone') {
-    const worktreesInZone = worktrees.filter(wt => isInZone(wt, zone));
-
-    // Zone label = workflow state
-    if (zone.label === "Done: PR merged or worktree abandoned") {
-      // Mark these as completed in memory
-    }
-  }
-}
-
-// 4. Check for state mismatches
-// E.g., PR merged but worktree still in "In Progress" zone
-```
-
-**Critical insight:** Agents MUST actually match worktrees to zones by position, not just list zones. The zone a worktree is IN determines its true state - this is the user's spatial organization of their workflow.
+**Note:** Originally required manual position matching. See improvement #9 for how zone information was automated and made directly available in MCP responses.
 
 **Location:** HEARTBEAT.md "Board & Zone Analysis" section
 
@@ -251,6 +225,114 @@ for (const [zoneId, zone] of Object.entries(board.objects)) {
 - Works with boardId requirement (#4)
 - Supports zone pinning feature (PR #538)
 - Enables zone triggers and automation
+- Made much simpler by zone fields in MCP (#9)
+
+---
+
+## 9. Zone Fields in Worktree MCP Responses ⭐
+
+**Added:** `zone_id` and `zone_label` fields directly in worktree MCP responses (PR #542)
+
+**What changed:**
+- All worktree responses now include `zone_id` and `zone_label` fields
+- Works with both `worktrees.get` and `worktrees.list`
+- No manual position calculations needed
+- Uses LEFT JOIN to board_object table in database
+
+**Example response:**
+```json
+{
+  "worktree_id": "4eb09656-e5b0-4f48-9278-03eefdc66cd4",
+  "name": "add-zone-info-to-worktree-mcp",
+  "board_id": "9833703b-b9e6-4b7b-b0eb-70f783fba715",
+  "zone_id": "zone-1770152375353",
+  "zone_label": "Codex review",
+  "pull_request_url": "https://github.com/preset-io/agor/pull/542"
+}
+```
+
+**Why it matters:**
+- **Massive simplification** - heartbeats no longer need complex position matching
+- Zone info available in single API call
+- Reduces cognitive load for agents
+- Enables zone-based filtering and queries
+- Foundation for zone-aware automation
+
+**Before (manual position matching):**
+```typescript
+// Required multiple API calls and complex math
+const board = await agor.boards.get({ boardId });
+const worktrees = await agor.worktrees.list();
+
+const isInZone = (wt, zone) =>
+  wt.x >= zone.x && wt.x <= (zone.x + zone.width) &&
+  wt.y >= zone.y && wt.y <= (zone.y + zone.height);
+
+// Match each worktree to zones...
+```
+
+**After (direct fields):**
+```typescript
+// Zone info is already there!
+const worktrees = await agor.worktrees.list();
+worktrees.data.forEach(wt => {
+  if (wt.zone_label === "Done: PR merged") {
+    markCompleted(wt);
+  }
+});
+```
+
+**Implementation details:**
+- Database: LEFT JOIN from worktree to board_object table
+- Efficient: Single query retrieves both worktree and zone data
+- Cross-database: Works with both SQLite and PostgreSQL
+- Handles edge cases: Worktrees not on boards, not in zones, etc.
+
+**Related Agor PR:** #542 - Add zone info to worktree MCP responses
+
+**Location:** Updates to BOARD_TEMPLATE_FOR_MAIN.md and HEARTBEAT.md to use direct fields instead of position calculations
+
+---
+
+## 10. Enhanced MCP Board Tools
+
+**Added:** Comprehensive board management tools in Agor MCP
+
+**Available tools:**
+- `boards.get({ boardId })` - Get board with all zones and objects
+- `boards.list()` - List all accessible boards
+- `boards.update({ boardId, ... })` - Update board metadata and manage zones
+- `worktrees.set_zone({ worktreeId, zoneId })` - Pin worktree to zone
+
+**Why it matters:**
+- Agents can programmatically manage boards and zones
+- Enables spatial organization automation
+- Foundation for zone-based workflows
+- Complements zone fields in worktree responses (#9)
+
+**Example usage:**
+```typescript
+// Get board with all zones
+const board = await agor.boards.get({
+  boardId: "9833703b-b9e6-4b7b-b0eb-70f783fba715"
+});
+
+// board.objects contains all zones, text, markdown objects
+// Can inspect zone definitions, positions, triggers
+
+// Move worktree to "Done" zone
+await agor.worktrees.set_zone({
+  worktreeId: "abc123",
+  zoneId: "zone-1770155449351"
+});
+```
+
+**Board object types:**
+- `zone` - Workflow zones with labels, triggers, positions
+- `text` - Text annotations on board
+- `markdown` - Rich text documentation
+
+**Location:** Reference these tools in AGENTS.md and HEARTBEAT.md examples
 
 ---
 
