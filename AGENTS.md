@@ -32,36 +32,67 @@ This workspace is an **agent operating center** that runs inside Agor sessions. 
 ### You Are Running Inside an Agor Session
 
 - **Current session:** This very conversation is happening in an Agor session
-- **Workspace:** This local repo (`~/code/agor-claw/`) is your home base
+- **Workspace:** This local repo is your home base for memory and state tracking
 - **AI Workloads:** All AI work runs through Agor MCP (not locally, not standalone)
 - **State Tracking:** You reference worktree IDs and session IDs locally in `memory/agor-state/`
 
-### When You Need AI Assistance
+### Orchestrator vs. Worker Sessions
 
-**DON'T:** Spin up local processes or standalone agent loops
+**You are an orchestrator session.** Your role is to delegate work, not do it directly.
 
-**DO:** Use Agor MCP to:
+**For coding work:**
+- Create NEW worktree (isolated workspace)
+- Create NEW session in that worktree (fresh worker agent)
+- Let the worker session handle implementation
+- Track outcomes in your local memory
+
+**For local tasks (memory updates, file reads, research):**
+- Do it yourself in this session
+- Or spawn subsession for parallel research
+- Or fork to explore alternative approaches
+
+**Key pattern:** One worktree = one session tree. Don't spawn coding subsessions in your orchestrator session.
+
+### Task Delegation Rules
+
+**When to create NEW worktree + NEW session (isolation):**
+- ANY coding work (features, fixes, refactors)
+- Work that needs git branching and PRs
+- Work that will be reviewed/merged independently
+
+**When to spawn subsession (parallel work in YOUR context):**
+- Research tasks (gather information, analyze patterns)
+- Multi-step investigations
+- Background monitoring
+
+**When to fork (reuse context, try alternatives):**
+- Explore different approaches to same problem
+- Restart from earlier decision point
+- Try alternative implementation strategies
+
+### Session Operation Types
+
 ```typescript
-// Create a worktree for isolated work
-const worktree = await agor.worktrees.create({
-  repoId: REPO_ID,
-  worktreeName: 'feature-xyz',
-  createBranch: true,
-  pullLatest: true,
+// sessions.create - NEW independent session (fresh context, no parent)
+const session = await agor.sessions.create({
+  worktreeId: worktree.worktree_id,
+  agenticTool: 'claude-code',
+  initialPrompt: "Implement feature X",
 });
 
-// Spawn a subsession for parallel work
+// sessions.spawn - Child subsession (fresh context, callback to parent)
 const subsession = await agor.sessions.spawn({
-  prompt: "Implement feature X",
-  enableCallback: true,  // Get notified when done
+  prompt: "Research best approach for Y",
+  enableCallback: true,  // Notifies you when done
   includeLastMessage: true,
 });
 
-// Track locally
-await updateAgorState({
-  worktree_id: worktree.worktree_id,
-  session_id: subsession.session_id,
-  purpose: "feature-xyz implementation",
+// sessions.prompt with fork - Sibling session (reuse context from fork point)
+const fork = await agor.sessions.prompt({
+  sessionId: original_session_id,
+  mode: 'fork',
+  prompt: "Try alternative approach Z",
+  taskId: decision_point_task_id,  // Where to fork from
 });
 ```
 
@@ -147,14 +178,16 @@ After setting up your board and repos during bootstrap, demonstrate that Agor in
      repoId: CONFIGURED_REPO_ID,
      worktreeName: 'agor-claw-hello',
      createBranch: true,
+     boardId: MAIN_BOARD_ID,  // Required!
    });
    ```
 
-2. **Spawn a simple session:**
+2. **Create a session in the worktree:**
    ```typescript
-   const session = await agor.sessions.spawn({
-     prompt: "Create a file called HELLO.md with a greeting",
-     enableCallback: true,
+   const session = await agor.sessions.create({
+     worktreeId: worktree.worktree_id,
+     agenticTool: 'claude-code',
+     initialPrompt: "Create a file called HELLO.md with a greeting",
    });
    ```
 
@@ -180,10 +213,11 @@ Before doing anything else:
 1. **Read `SOUL.md`** — who you are
 2. **Read `USER.md`** — who you're helping
 3. **Read `IDENTITY.md`** — your identity and Agor configuration (board ID, repos)
-4. **Read `memory/YYYY-MM-DD.md`** (today + yesterday) — recent context
-5. **Read `MEMORY.md`** — long-term curated memory
-6. **Sync Agor state** — refresh `memory/agor-state/` with current worktrees/sessions
-7. **Check `repos/` directory** — read context files for repos you'll be working in
+4. **Read `BOARD.md`** — board zones and workflow expectations
+5. **Read `memory/YYYY-MM-DD.md`** (today + yesterday) — recent context
+6. **Read `MEMORY.md`** — long-term curated memory
+7. **Sync Agor state** — refresh `memory/agor-state/` with current worktrees/sessions
+8. **Check `repos/` directory** — read context files for repos you'll be working in
 
 Don't ask permission. Just do it.
 
@@ -263,26 +297,72 @@ memory/
 
 All AI work goes through Agor MCP. Here are your most common operations:
 
+### 🚨 CRITICAL: Coding Work Requires Isolation
+
+When doing ANY coding work (features, fixes, refactors):
+
+1. **ALWAYS create NEW worktree** (not spawn in existing)
+2. **ALWAYS create NEW session** in that worktree (not spawn subsession)
+3. **ALWAYS specify boardId** (REQUIRED - prevents orphaned worktrees)
+
+**Wrong pattern (will cause problems):**
+```typescript
+// ❌ Don't spawn coding subsession in orchestrator
+const subsession = await agor.sessions.spawn({
+  prompt: "Implement feature X",  // This is coding work!
+});
+```
+
+**Correct pattern (isolation):**
+```typescript
+// ✅ Create worktree + session for coding work
+const worktree = await agor.worktrees.create({
+  repoId: REPO_ID,
+  worktreeName: 'feature-x',
+  createBranch: true,
+  boardId: MAIN_BOARD_ID,  // Required!
+});
+
+const session = await agor.sessions.create({
+  worktreeId: worktree.worktree_id,
+  agenticTool: 'claude-code',
+  initialPrompt: "Implement feature X",
+});
+```
+
+**Why this matters:**
+- Prevents orphaned worktrees (invisible on boards)
+- Avoids subsession callback cascades
+- Maintains clear separation: orchestrator delegates, workers execute
+- Enables proper git workflow (one worktree = one branch = one PR)
+
 ### Worktree Management
 
 ```typescript
-// List worktrees
+// List worktrees (optionally filter by repo)
 const worktrees = await agor.worktrees.list({ repoId });
 
-// Create worktree
+// Create worktree (boardId is REQUIRED)
 const wt = await agor.worktrees.create({
   repoId,
   worktreeName: 'feature-name',
   createBranch: true,
   sourceBranch: 'main',
   pullLatest: true,
-  boardId: MAIN_BOARD_ID, // Place on your board!
+  boardId: MAIN_BOARD_ID,  // REQUIRED - prevents orphaned worktrees
 });
 
 // Update worktree metadata
 await agor.worktrees.update({
   worktreeId: wt.worktree_id,
   notes: 'Working on feature X',
+  issueUrl: 'https://github.com/org/repo/issues/123',
+});
+
+// Move worktree to a zone
+await agor.worktrees.set_zone({
+  worktreeId: wt.worktree_id,
+  zoneId: 'zone-1234567890',
 });
 ```
 
@@ -308,13 +388,39 @@ const tasks = await agor.tasks.list({
 ### Board Management
 
 ```typescript
-// Get your main board
+// List all accessible boards
+const boards = await agor.boards.list();
+
+// Get your main board with all zones and objects
 const board = await agor.boards.get({
-  boardId: MAIN_BOARD_ID, // From IDENTITY.md
+  boardId: MAIN_BOARD_ID,  // From IDENTITY.md
 });
 
-// List all boards
-const boards = await agor.boards.list();
+// board.objects contains zones, text, markdown objects
+// Zones have: id, label, x, y, width, height, borderColor, backgroundColor, trigger (optional)
+board.objects.forEach(obj => {
+  if (obj.type === 'zone') {
+    console.log(`Zone: ${obj.label} (${obj.id})`);
+  }
+});
+
+// Update board (add/update zones, change metadata)
+await agor.boards.update({
+  boardId: MAIN_BOARD_ID,
+  name: 'Updated Board Name',
+  upsertObjects: {
+    'zone-123': {
+      type: 'zone',
+      label: 'In Progress',
+      x: 100,
+      y: 100,
+      width: 400,
+      height: 600,
+      borderColor: '#3b82f6',
+      backgroundColor: '#eff6ff',
+    },
+  },
+});
 ```
 
 ---

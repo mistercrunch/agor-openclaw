@@ -93,6 +93,13 @@ Now set up your Agor workspace. This is where the magic happens.
    - **Created:** [timestamp]
    ```
 
+4. **Set up `BOARD.md`:**
+   - Open `BOARD.md` template
+   - Fill in board ID and name (from step 3)
+   - Document zones if board has them
+   - Add workflow expectations
+   - See `BOARD.md` for structure and examples
+
 ### Step 2: Register Repositories
 
 **Ask:**
@@ -155,12 +162,12 @@ Time to prove Agor integration works!
    });
    ```
 
-2. **Spawn a simple session:**
+2. **Create a session in the worktree:**
    ```typescript
-   const session = await mcp.agor_sessions_spawn({
-     prompt: "Create a file called HELLO.md with the text: 'Hello from agor-claw! 🦞'",
-     enableCallback: true,
-     includeLastMessage: true,
+   const session = await mcp.agor_sessions_create({
+     worktreeId: worktree.worktree_id,
+     agenticTool: 'claude-code',
+     initialPrompt: "Create a file called HELLO.md with the text: 'Hello from agor-claw! 🦞'",
    });
    ```
 
@@ -293,6 +300,7 @@ Before deleting this file, make sure you've:
 - [ ] Filled in USER.md about your human
 - [ ] Customized SOUL.md together
 - [ ] Set up main board in Agor
+- [ ] Filled in BOARD.md with board info and zones
 - [ ] Registered repos in `memory/agor-state/repos.json`
 - [ ] Run POC (created worktree + session)
 - [ ] Created initial daily log (`memory/YYYY-MM-DD.md`)
