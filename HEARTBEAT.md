@@ -37,20 +37,11 @@ Get your main board ID from IDENTITY.md, then:
 ### Active Worktrees (on your board)
 - Check for stale worktrees (no activity in >7 days)
 - Identify worktrees with failed CI/CD or `needs_attention` flag
-- Look for completed work that can be moved to archive/done zone
 - Verify worktrees are in appropriate zones based on actual state
-- Detect mismatches (e.g., completed work in "In Progress" zone)
+- Detect mismatches (e.g., PR merged but still in "In Progress" zone)
+- **Follow zone-specific behaviors defined in BOARD.md**
+- **When worktree has pull_request_url:** Check PR status with `gh pr view <url>` and follow zone instructions
 - **Ignore worktrees on other boards** - not your responsibility
-
-**When worktree has pull_request_url:**
-- Use `gh pr view <url>` to check PR state (if gh CLI available)
-- Consider PR status + zone + recent session activity:
-  - PR approved + zone="In Progress" → May need merging
-  - PR has requested changes + zone="Ready for PR" → Move to "In Progress", address feedback
-  - PR merged + any zone → Move to "Done" zone, mark completed
-  - PR has recent comments + session idle → May need agent attention
-- Review recent PR comments for actionable feedback
-- Check CI/CD status with `gh pr checks <url>` (failing checks may need fixes)
 
 ### Running Sessions (on your board)
 - Check for blocked/stuck sessions

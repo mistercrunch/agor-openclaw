@@ -42,10 +42,14 @@
 - **Workflow State:** in-progress
 - **Agent Behavior:**
   - Worktrees here are actively being worked on
-  - Run tests, make commits, iterate on implementation
-  - When work is complete and ready for PR, move to "Create a pull request" zone
-  - If abandoned or blocked, move to "Done" zone with notes
+  - **Check PR status during heartbeats:**
+    - If pull_request_url exists, use `gh pr view <url>` to check state
+    - PR merged → Move to "Done" zone
+    - PR has requested changes → This is correct zone, address feedback
+    - PR failing CI → Check what's broken, may need fixes
   - Check for staleness: flag if no activity in 7+ days
+  - When work is complete and ready for PR creation, move to "Create a pull request" zone
+  - If abandoned or blocked, move to "Done" zone with notes
 
 **Zone Trigger:** None (manual work)
 
@@ -138,10 +142,14 @@ Pass in the context you think is more relevant to getting a good code review on 
   - This is a terminal state for automated agents
   - Don't take automated actions on worktrees here
   - Mark as "awaiting human" in memory
-  - Report in heartbeat status but don't attempt to modify
-  - Human will review, approve, merge, or request changes
-  - Only touch if explicitly asked by human
-  - After PR merged, human will move to "Done" zone
+  - **Check PR status during heartbeats:**
+    - Use `gh pr view <pull_request_url>` to check state
+    - If PR merged → Move to "Done" zone immediately
+    - If PR has requested changes → Flag for attention, may need to move back to "Agor Coding Tasks"
+    - If PR has failing CI → Note in heartbeat report
+    - If PR approved but not merged → Just waiting
+  - Only modify worktrees if PR status changes
+  - After PR merged, automatically move to "Done" zone
 
 **Zone Trigger:** None (human action required)
 
