@@ -40,7 +40,9 @@
 - **Position:** (-460, 980) to (195, 2841)
 - **Purpose:** Active development work on Agor features
 - **Workflow State:** in-progress
+- **⭐ START HERE:** All new coding tasks begin in this zone
 - **Agent Behavior:**
+  - **New worktrees:** Place all coding tasks here initially (use `worktrees_set_zone` after creation)
   - Worktrees here are actively being worked on
   - **Check PR status during heartbeats:**
     - If pull_request_url exists, use `gh pr view <url>` to check state
@@ -253,11 +255,7 @@ Pass in the context you think is more relevant to getting a good code review on 
 
 ### For New Work
 
-1. **Choose appropriate starting zone:**
-   - Coding tasks → "Agor Coding Tasks"
-   - Meta/orchestration work → "MAIN SESH"
-
-2. **Create worktree with boardId:**
+1. **Create worktree with boardId:**
    ```typescript
    const wt = await agor.worktrees.create({
      repoId,
@@ -268,8 +266,17 @@ Pass in the context you think is more relevant to getting a good code review on 
    });
    ```
 
-3. **Position will be auto-assigned by Agor**
-4. **Move between zones as work progresses**
+2. **Move to starting zone immediately:**
+   - **ALL coding tasks:** → "Agor Coding Tasks" zone (zone-1770144681071)
+   - **Orchestration/meta work:** → "MAIN SESH" zone (zone-1770143185072)
+   ```typescript
+   await agor.worktrees_set_zone({
+     worktreeId: wt.worktree_id,
+     zoneId: 'zone-1770144681071', // Agor Coding Tasks
+   });
+   ```
+
+3. **Move between zones as work progresses through workflow**
 
 ---
 
