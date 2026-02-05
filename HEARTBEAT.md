@@ -14,33 +14,76 @@ Add tasks below when you want periodic checks on Agor resources.
 
 **Read `BOARD.md` first** to understand zone meanings and workflow states.
 
-Zone information is now **directly available** in worktree responses (no position calculations needed):
+**Then execute this workflow for each worktree on your board:**
 
 ```
-Get your main board ID from IDENTITY.md, then:
+1. Get board ID from IDENTITY.md
+2. List all worktrees: agor_worktrees_list (includes zone_id, zone_label automatically)
+3. Filter to your board: where board_id === MAIN_BOARD_ID
 
-1. List all worktrees (use agor_worktrees_list)
-   - Each worktree includes: zone_id, zone_label, board_id
+FOR EACH worktree on your board:
 
-2. Filter to your board (check board_id === MAIN_BOARD_ID)
+  IF zone_label = "Done: PR merged or worktree abandoned":
+    → Skip (don't report, reduce noise)
 
-3. Check zone_label for each worktree:
-   - "Done: PR merged or worktree abandoned" → Mark completed, archive
-   - "Open a PR" + no pull_request_url → Create PR
-   - "In Progress" + stale last_updated → Flag as stale
-   - "Design!" → Still planning, don't expect code yet
-   - "Codex review" / "Human review" → In review, check PR status
+  IF zone_label = "MAIN SESH":
+    → Check health, ensure orchestrator is running properly
+
+  IF zone_label = "Agor Coding Tasks":
+    → Get session for worktree (agor_sessions_get using worktree_id)
+    → Check session.status and last_message
+    → IF session is blocked/stuck:
+      → Review why (check last_message for errors, questions)
+      → IF unblockable without human: Flag for attention
+      → IF simple unblock (e.g., "keep going"): Prompt session to continue
+    → IF session looks done coding (last_message indicates completion):
+      → Move to "Create a pull request" zone WITH trigger:
+        agor_worktrees_set_zone(worktreeId, zone-1770152350171, triggerTemplate=true, targetSessionId)
+    → IF pull_request_url exists:
+      → Check PR status: gh pr view <url> --json state,mergeable,reviews
+      → IF merged: Move to "Done" zone immediately
+      → IF has requested changes: Flag or prompt session to address
+
+  IF zone_label = "Create a pull request":
+    → Get session last_message
+    → IF no pull_request_url on worktree yet:
+      → Check if session is working on it (review last_message)
+      → IF stuck: May need to prompt or flag
+    → IF pull_request_url exists:
+      → Check PR: gh pr view <url> --json state,mergeable,reviews
+      → IF merged/closed: Move to "Done" zone
+      → IF ready for review: Decide Codex or Human
+        → Complex/risky code: Move to "Codex review" WITH trigger
+        → Simple/confident: Move to "Human review" (no trigger)
+
+  IF zone_label = "Codex review":
+    → Get session last_message
+    → Check if Codex subsession callback received
+    → IF callback received with feedback:
+      → Check if session addressed feedback
+      → IF needs prompting: Prompt with "address Codex feedback worth addressing"
+    → IF review complete and addressed:
+      → Move to "Human review" zone (no trigger, terminal state)
+
+  IF zone_label = "Human review":
+    → MUST check PR status: gh pr view <pull_request_url> --json state,mergeable,reviews,comments
+    → IF merged: Move to "Done" zone IMMEDIATELY
+    → IF closed (not merged): Move to "Done" zone, note abandoned
+    → IF requested changes: Flag for attention, may need to move back to "Agor Coding Tasks"
+    → IF new comments from human: Flag for attention
+    → IF approved but not merged: Just waiting, do nothing
+
+END FOR EACH
 ```
 
-**Key insight:** Zones encode workflow state. Trust `zone_label` as source of truth.
+**Key insight:** Zones encode workflow state. Trust `zone_label` as source of truth. **Execute actions based on zone state.**
 
 ### Active Worktrees (on your board)
-- Check for stale worktrees (no activity in >7 days)
-- Identify worktrees with failed CI/CD or `needs_attention` flag
-- Verify worktrees are in appropriate zones based on actual state
-- Detect mismatches (e.g., PR merged but still in "In Progress" zone)
-- **Follow zone-specific behaviors defined in BOARD.md**
-- **When worktree has pull_request_url:** Check PR status with `gh pr view <url>` and follow zone instructions
+**See pseudocode above for detailed workflow by zone.**
+
+Additional checks:
+- Flag stale worktrees (no activity in >7 days) in "Agor Coding Tasks"
+- Identify worktrees with `needs_attention` flag
 - **Ignore worktrees on other boards** - not your responsibility
 
 ### Running Sessions (on your board)
