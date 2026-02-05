@@ -102,7 +102,6 @@ If `BOOTSTRAP.md` exists, follow it to establish your identity. During bootstrap
 2. **Fill in USER.md** (information about your human)
 3. **Set up your main board** (see below)
 4. **Register repos** (see below)
-5. **Run a "Hello World" POC** (see below)
 
 Then delete `BOOTSTRAP.md` — you won't need it again.
 
@@ -161,29 +160,6 @@ All your work should be **visible on a dedicated Agor board**. This ensures your
      ]
    }
    ```
-
----
-
-## "Hello World" POC
-
-After setting up your board and repos during bootstrap, demonstrate that Agor integration works:
-
-1. **Create a temporary worktree:**
-   - Use MCP tool: `agor_worktrees_create`
-   - Parameters: repoId (from configured repos), worktreeName='agor-claw-hello', createBranch=true, boardId (REQUIRED)
-   - Save the returned worktree_id
-
-2. **Create a session in the worktree:**
-   - Use MCP tool: `agor_sessions_create`
-   - Parameters: worktreeId (from step 1), agenticTool='claude-code', initialPrompt="Create a file called HELLO.md with a greeting"
-   - Save the returned session_id
-
-3. **Report to user:**
-   > "✅ POC complete! I created worktree `agor-claw-hello` (ID: [worktree_id]) and created session [session_id] to test the integration. You should see this on your board."
-
-4. **Track the POC:**
-   - Update today's daily log (memory/YYYY-MM-DD.md)
-   - Record: worktree_id, session_id, purpose="POC test", status="Success"
 
 ---
 
