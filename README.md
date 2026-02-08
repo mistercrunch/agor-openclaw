@@ -24,7 +24,7 @@ Agor Claw is an **agent operating center** that runs inside [Agor](https://agor.
 
 ## The Board Workflow
 
-The included board (`board-export.json`) implements a proven workflow with **two entry points** and **zone-based automation**:
+The included board ([`agor-claw.agor-board`](agor-claw.agor-board)) implements a proven workflow with **two entry points** and **zone-based automation**:
 
 ```
                     +----------------+
@@ -92,11 +92,18 @@ This means **dragging worktrees between zones triggers automated workflows**. Yo
 
 ## Importing the Board
 
-The board configuration is exported in `board-export.json`. To recreate this board in your Agor instance:
+The board configuration is exported as `agor-claw.agor-board` -- a native Agor board export file (YAML format).
 
-### Option 1: Use Agor MCP (Recommended)
+### Import via Agor UI
 
-Use the `agor_boards_update` MCP tool to create a board and add zones:
+1. Go to your Agor instance
+2. Use the board import feature to upload `agor-claw.agor-board`
+3. The board will be created with all zones, triggers, colors, and layout intact
+4. Update `IDENTITY.md` with your new board ID
+
+### Import via Agor MCP
+
+Use the `agor_boards_update` MCP tool to create a board and add zones programmatically:
 
 ```typescript
 // 1. Create a new board (or use an existing one)
@@ -105,25 +112,18 @@ Use the `agor_boards_update` MCP tool to create a board and add zones:
 // 2. Add all zones using boards.update
 await agor.boards.update({
   boardId: YOUR_BOARD_ID,
-  name: "My Agor Claw Board",
+  name: "Agor Claw",
   icon: "🦀",
   upsertObjects: {
-    // Copy the "objects" from board-export.json here
+    // Copy the "objects" from agor-claw.agor-board here
     // Each zone has position, size, color, and optional trigger
   }
 });
 ```
 
-### Option 2: Manual Setup
-
-1. Create a board in Agor UI
-2. Add zones matching the layout in `BOARD.md`
-3. Configure zone triggers from the templates in `board-export.json`
-4. Update `IDENTITY.md` with your board ID
-
 ### Zone IDs
 
-The zone IDs in `board-export.json`, `BOARD.md`, and `HEARTBEAT.md` are all consistent. If you create zones with different IDs, update all three files.
+The zone IDs in `agor-claw.agor-board`, `BOARD.md`, and `HEARTBEAT.md` are all consistent. If you create zones with different IDs, update `BOARD.md` and `HEARTBEAT.md` to match.
 
 ---
 
@@ -141,7 +141,7 @@ agor-claw/
 ├── BOOT.md                # Startup checklist
 ├── MEMORY.md              # Long-term curated memory
 ├── TOOLS.md               # Environment shortcuts and quick reference
-├── board-export.json      # Exported board configuration
+├── agor-claw.agor-board   # Importable board configuration (YAML)
 ├── memory/
 │   ├── agor-state/        # Agor resource tracking (JSON)
 │   │   ├── README.md
@@ -224,7 +224,7 @@ The `HEARTBEAT.md` defines what the agent checks periodically:
 ## Getting Started
 
 1. **Fork/clone this repo** into your Agor instance
-2. **Import the board** using `board-export.json` (see instructions above)
+2. **Import the board** using `agor-claw.agor-board` (see instructions above)
 3. **Customize** `IDENTITY.md`, `USER.md`, and `BOARD.md`
 4. **Create a session** in the workspace -- the agent will read `AGENTS.md` and begin operating
 5. **Assign work** -- the agent will create worktrees, delegate to sessions, and track progress on the board
