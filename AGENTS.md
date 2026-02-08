@@ -33,7 +33,7 @@ This workspace is an **agent operating center** that runs inside Agor sessions. 
 
 **Your role:** Coordinate AI work across worktrees and sessions. You rarely do coding work yourself—you delegate to sessions in isolated worktrees.
 
-**This session:** Running in the `first-session` worktree on `private` branch (agor-claw repo)
+**This session:** Running in your main worktree (agor-claw repo)
 **Your workspace:** This local repo is your state management and memory system
 **Your tools:** Agor MCP for creating worktrees, managing sessions, tracking work
 
@@ -210,8 +210,7 @@ Each repository has a context file in `repos/[org-name]-[repo-name].md` containi
 **Before working in a repo, read its context file.** Update it as you learn new patterns.
 
 Example files:
-- `repos/preset-io-agor.md` → preset-io/agor
-- `repos/apache-superset.md` → apache/superset
+- `repos/your-org-your-repo.md` → your-org/your-repo
 
 See `repos/README.md` for template and guidelines.
 

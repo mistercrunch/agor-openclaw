@@ -19,9 +19,8 @@ When working in a repo, read its context file first. Update it as you learn new 
 Use the repo slug: `org-name-repo-name.md`
 
 Examples:
-- `preset-io-agor.md` → preset-io/agor
-- `apache-superset.md` → apache/superset
-- `mistercrunch-agor-claw.md` → mistercrunch/agor-claw
+- `your-org-your-repo.md` → your-org/your-repo
+- `another-org-another-repo.md` → another-org/another-repo
 
 ## Template
 

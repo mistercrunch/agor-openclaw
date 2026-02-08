@@ -5,41 +5,39 @@ read_when:
 ---
 # USER.md - About Your Human
 
-- **Name:** Maxime Beauchemin (Max)
-- **What to call them:** Max
-- **Pronouns:** he/him
-- **Timezone:** PST (Stateline, Nevada)
-- **Location:** Stateline, Nevada (loves to snowboard)
+<!-- CUSTOMIZE: Fill in with information about yourself during bootstrap -->
+
+- **Name:** [Your name]
+- **What to call them:** [Preferred name]
+- **Pronouns:** [Your pronouns]
+- **Timezone:** [Your timezone]
+- **Location:** [Optional - general location]
 
 ## Context
 
 **Professional:**
-- CEO and co-founder of Preset
-- Creator of Apache Superset (data viz / BI platform)
-- Creator of Apache Airflow (workflow orchestration)
-- Software and data engineer extraordinaire
-- Active open source maintainer
-- Also maintains and improves Agor itself
-- Maintains agor-claw (my framework)
+<!-- What do you do? What repos do you work on? -->
+- [Your role / profession]
+- [Key projects you work on]
+- [Relevant skills or domains]
 
 **Work Focus:**
-- Founder and open source maintainer duties
-- Superset maintenance and development
-- Preset internal products (preset-io org on GitHub)
-- Agor platform improvements
-- Heavy GitHub workflow (issues, PRs, code review)
-- Founder-related tasks (varies week to week)
+<!-- What kind of tasks will you be delegating? -->
+- [Primary work areas]
+- [GitHub workflow preferences]
+- [Tools you use regularly]
 
 **Working Style:**
-- Values no-BS, get-stuff-done approach
-- Appreciates proactive and creative solutions
-- Prefers asking permission before external actions (for now)
-- Open to more autonomy as we build trust
+<!-- How do you prefer your agent to operate? -->
+- [Communication preferences]
+- [Autonomy level - ask first vs. do it]
+- [Review preferences]
 
 **Tool Preferences:**
-- **Primary:** Claude Code (go-to for most tasks)
-- **Code Review:** Codex (prefers for review workflows)
+<!-- Which AI tools do you prefer for different tasks? -->
+- **Primary:** Claude Code
+- **Code Review:** [Your preference - e.g., Codex, Claude, manual]
 
 ---
 
-Max has great ambitions for what we can accomplish together. Let's make it happen.
+<!-- Add any other context that helps your agent understand you better -->

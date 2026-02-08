@@ -1,0 +1,126 @@
+{
+  "board_id": "9833703b-b9e6-4b7b-b0eb-70f783fba715",
+  "name": "Agor Claw Board",
+  "slug": "agor-claw-experiment",
+  "icon": "\ud83e\udd80",
+  "background_color": "linear-gradient(135deg, #f5af19 0%, #f12711 30%, #f5af19 60%, #f12711 100%)",
+  "objects": {
+    "zone-1770143185072": {
+      "x": -1200,
+      "y": 200,
+      "type": "zone",
+      "label": "MAIN SESH",
+      "width": 1274.8333075879937,
+      "height": 723.0106439318529,
+      "borderColor": "#d9d9d9",
+      "backgroundColor": "#d9d9d91a"
+    },
+    "zone-1770144681071": {
+      "x": -1200,
+      "y": 980,
+      "type": "zone",
+      "label": "Agor Coding Tasks",
+      "width": 1427.5,
+      "height": 840,
+      "locked": true,
+      "borderColor": "#ffeae5",
+      "backgroundColor": "#ff6b351a"
+    },
+    "zone-1770152350171": {
+      "x": 260,
+      "y": 980,
+      "type": "zone",
+      "label": "Create a pull request",
+      "width": 687.5,
+      "height": 1860,
+      "trigger": {
+        "behavior": "show_picker",
+        "template": "ok now let's:\n- pnpm i\n- pnpm check\n- commit\n- open a PR\n- attach the pull request to the worktree using MCP\n\nPlease maintain a todo list so I can track progress!"
+      },
+      "borderColor": "#642ab5",
+      "backgroundColor": "#f7931e1a"
+    },
+    "zone-1770152375353": {
+      "x": 980,
+      "y": 980,
+      "type": "zone",
+      "label": "Codex review",
+      "width": 687.5,
+      "height": 1860,
+      "trigger": {
+        "behavior": "show_picker",
+        "template": "Can you please spawn a Codex subsession to review our code?\n\n- point the the branch: {{ worktree.name }} \n- point to the PR: {{ worktree.pull_request_url }}\n- tell the agent they can use `gh`\n\nPass in the context you think is more relevant to getting a good code review on our effort here. Make sure to set the subsession to callback when done with the results (that's an MCP tool parameter)!"
+      },
+      "borderColor": "#ffd700ff",
+      "backgroundColor": "#ffd7001a"
+    },
+    "zone-1770152859108": {
+      "x": 1722.5,
+      "y": 980,
+      "type": "zone",
+      "label": "Human review",
+      "width": 687.5,
+      "height": 1860,
+      "borderColor": "#00ff00ff",
+      "backgroundColor": "#00ff001a"
+    },
+    "zone-1770155449351": {
+      "x": -1200,
+      "y": 2900,
+      "type": "zone",
+      "label": "Done: PR merged or worktree abandoned",
+      "width": 2152.799432485924,
+      "height": 1188.974032475223,
+      "borderColor": "#d9d9d9",
+      "backgroundColor": "#d9d9d91a"
+    },
+    "zone-1770517487066": {
+      "x": -460,
+      "y": 1860,
+      "type": "zone",
+      "label": "Implement the Plan",
+      "width": 682.9724061866523,
+      "height": 974.9806385310891,
+      "locked": true,
+      "trigger": {
+        "behavior": "show_picker",
+        "template": "Go ahead and implement the plan suggested!"
+      },
+      "borderColor": "#d9d9d9",
+      "backgroundColor": "#d9d9d91a"
+    },
+    "zone-1770517752209": {
+      "x": 1000,
+      "y": 2900,
+      "type": "zone",
+      "label": "Abandonned",
+      "width": 1409.9055301903827,
+      "height": 1189.2192827338206,
+      "borderColor": "#d9d9d9",
+      "backgroundColor": "#d9d9d91a"
+    },
+    "markdown-1770192761600": {
+      "x": 280,
+      "y": -220,
+      "type": "markdown",
+      "width": 2000,
+      "content": "<img src =\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4fXSwhiW0Eb2lGzmNue91AjKZ-c420l6qWRP0mQkVZWlxxe_Iq0MkDlUYw7GrvFfd2UqhpLGsSYc9H3-o33nWGXEUX_OPcTWpzn3lQNvZTVyzEx1CJw2r2UQMfkFdNiHJF4_x8mLAkOy7st09Siko8G8KTlPyNkVNeLDf2xTKVgCFLnumaeT4v7Q_f27J/s1700-e365/openclaw.jpg\" width=\"100%\">"
+    },
+    "zone-analyze-github-issue": {
+      "x": -1200,
+      "y": 1860,
+      "type": "zone",
+      "label": "Analyze GitHub Issue",
+      "width": 707.5,
+      "height": 980,
+      "locked": true,
+      "trigger": {
+        "behavior": "show_picker",
+        "template": "Please deeply analyze the GitHub issue: {{ worktree.issue_url }}\n\nYour task is to ANALYZE and DESIGN a solution, NOT to write code yet.\n\n1. Read and understand the issue thoroughly\n2. Search the codebase to understand the relevant code areas\n3. Identify the root cause or requirements\n4. Research existing patterns and conventions in the codebase\n5. Design a solution approach with step-by-step implementation plan\n6. Document your findings and proposed solution\n\nDO NOT write code or make changes yet. Focus on deep analysis and thoughtful design.\n\nWhen done, summarize your findings and recommend next steps (move to 'Implement the Plan' zone)."
+      },
+      "borderColor": "#4a9eff",
+      "backgroundColor": "#4a9eff1a"
+    }
+  },
+  "_note": "This is an exported Agor board configuration. See README.md for import instructions."
+}

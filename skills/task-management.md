@@ -1,6 +1,6 @@
 # Skill: Task Management in Agor
 
-**When to use:** When Max assigns tasks that require independent worktrees and sessions
+**When to use:** When your human assigns tasks that require independent worktrees and sessions
 
 **Purpose:** Track and manage multi-worktree tasks from end to end, ensuring nothing falls through the cracks.
 
@@ -200,7 +200,7 @@ When task completes:
 
 ## Contributing Improvements to Main
 
-When working in `first-session` (or other experimental branches), identify improvements that should go to `main`:
+When working in your branch, identify improvements that should go to `main`:
 
 **Framework improvements (contribute to main):**
 - New skills (like this one)
@@ -216,11 +216,11 @@ When working in `first-session` (or other experimental branches), identify impro
 
 **Process:**
 1. Note improvements in `memory/learnings/`
-2. Periodically review with Max
+2. Periodically review with your human
 3. Create PR from working branch → main with just framework updates
 4. Keep template clean and generally applicable
 
 ---
 
-**Last Updated:** 2026-02-03
-**Created By:** Darryl (bootstrap session)
+**Last Updated:** [date]
+**Created By:** [your agent]
