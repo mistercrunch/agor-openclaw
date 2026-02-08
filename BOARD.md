@@ -18,10 +18,20 @@
 
 **Why zones matter:** Zones represent workflow states. The zone a worktree is IN determines its true status—this is your spatial organization of work.
 
+**Board Layout:**
+- **Horizontal flow (left-to-right):** Main workflow for all tasks - MAIN SESH → Agor Coding Tasks → Create PR → Codex Review → Human Review → Done
+- **Vertical flow (GitHub issues):** Analyze GitHub Issue (top) → Implement the Plan (bottom) → joins horizontal flow at "Create PR"
+
+**Two entry points:**
+1. **External prompts/direct tasks:** Start at "Agor Coding Tasks" (horizontal flow)
+2. **GitHub issue-driven work:** Start at "Analyze GitHub Issue" (vertical flow)
+
+## Horizontal Flow Zones (Main Workflow)
+
 ### MAIN SESH
 
 - **Zone ID:** zone-1770143185072
-- **Position:** (-460, 220) to (815, 943)
+- **Position:** (-1200, 200) to (75, 923)
 - **Purpose:** Primary orchestrator workspace
 - **Workflow State:** control-center
 - **Agent Behavior:**
@@ -34,15 +44,16 @@
 
 ---
 
+
 ### Agor Coding Tasks
 
 - **Zone ID:** zone-1770144681071
-- **Position:** (-460, 980) to (195, 2841)
-- **Purpose:** Active development work on Agor features
+- **Position:** (-1200, 980) to (227.5, 1820)
+- **Purpose:** Active development work on Agor features (externally prompted tasks)
 - **Workflow State:** in-progress
-- **⭐ START HERE:** All new coding tasks begin in this zone
+- **⭐ START HERE for external/direct tasks:** Tasks that don't originate from GitHub issues
 - **Agent Behavior:**
-  - **New worktrees:** Place all coding tasks here initially (use `worktrees_set_zone` after creation)
+  - **Entry point for:** Direct requests, bug reports via chat, feature ideas, refactors
   - Worktrees here are actively being worked on
   - **Check PR status during heartbeats:**
     - If pull_request_url exists, use `gh pr view <url>` to check state
@@ -51,15 +62,76 @@
     - PR failing CI → Check what's broken, may need fixes
   - Check for staleness: flag if no activity in 7+ days
   - When work is complete and ready for PR creation, move to "Create a pull request" zone
-  - If abandoned or blocked, move to "Done" zone with notes
+  - If abandoned or blocked, move to "Abandoned" zone with notes explaining why
 
 **Zone Trigger:** None (manual work)
 
-**Current worktrees:**
-- fix-mcp-session-start → PR #533 (may be done)
-- agor-mcp-session-defaults → PR #535 (may be done)
-- agor-zone-pinning → PR #538 (may be done)
-- add-zone-info-to-worktree-mcp → active work
+---
+
+## Vertical Flow Zones (GitHub Issue Workflow)
+
+### Analyze GitHub Issue
+
+- **Zone ID:** zone-analyze-github-issue
+- **Position:** (-1200, 1860) to (-492.5, 2840)
+- **Purpose:** Deep analysis and solution design for GitHub issues
+- **Workflow State:** analysis
+- **⭐ START HERE for GitHub issues:** Issue-driven work begins here
+- **Agent Behavior:**
+  - **Research-only zone:** NO CODE WRITING allowed here
+  - Read and understand the GitHub issue (from `worktree.issue_url`)
+  - Search codebase to understand relevant areas
+  - Identify root cause or requirements
+  - Research existing patterns and conventions
+  - Design solution approach with step-by-step implementation plan
+  - Document findings and proposed solution (create PLAN.md or similar)
+  - When analysis complete, move to "Implement the Plan" zone
+
+**Zone Trigger:** show_picker
+```
+Please deeply analyze the GitHub issue: {{ worktree.issue_url }}
+
+Your task is to ANALYZE and DESIGN a solution, NOT to write code yet.
+
+1. Read and understand the issue thoroughly
+2. Search the codebase to understand the relevant code areas
+3. Identify the root cause or requirements
+4. Research existing patterns and conventions in the codebase
+5. Design a solution approach with step-by-step implementation plan
+6. Document your findings and proposed solution
+
+DO NOT write code or make changes yet. Focus on deep analysis and thoughtful design.
+
+When done, summarize your findings and recommend next steps (move to 'Implement the Plan' zone).
+```
+
+---
+
+### Implement the Plan
+
+- **Zone ID:** zone-1770517487066
+- **Position:** (-460, 1860) to (222.97, 2835)
+- **Purpose:** Implementation of analyzed GitHub issues
+- **Workflow State:** implementing
+- **Agent Behavior:**
+  - Execute the plan created in "Analyze GitHub Issue" zone
+  - Reference PLAN.md or analysis document
+  - Write code to implement the designed solution
+  - Follow the step-by-step approach from analysis
+  - When implementation complete and ready for PR, move to "Create a pull request" zone
+  - If work becomes blocked or should be abandoned, move to "Abandoned" zone with notes
+  - **Joins horizontal flow:** After implementation, flows directly to "Create a pull request"
+
+**Zone Trigger:** show_picker
+```
+Go ahead and implement the plan suggested!
+```
+
+---
+
+## Shared Workflow Zones (Both Flows Converge Here)
+
+Both horizontal (Agor Coding Tasks) and vertical (Implement the Plan) flows converge at "Create a pull request" and follow the same path to completion.
 
 ---
 
@@ -157,20 +229,37 @@ Pass in the context you think is more relevant to getting a good code review on 
 
 ---
 
-### Done: PR merged or worktree abandoned
+### Done: PR merged
 
 - **Zone ID:** zone-1770155449351
-- **Position:** (-460, 2940) to (1173, 4429)
-- **Purpose:** Completed or abandoned work
+- **Position:** (-1200, 2900) to (952.8, 4089)
+- **Purpose:** Successfully completed work (PR merged)
 - **Workflow State:** done
 - **Agent Behavior:**
   - Mark as completed in memory
   - Archive from active tracking
   - Don't report in heartbeat checks (noise reduction)
-  - Clean up stale worktrees if filesystem_status is not "ready"
   - These worktrees are historical record—don't modify unless asked
-  - If PR was merged, celebrate! 🎉
-  - If abandoned, record why in memory for learning
+  - Celebrate! 🎉
+  - Record learnings and patterns discovered
+
+**Zone Trigger:** None (terminal state)
+
+---
+
+### Abandoned
+
+- **Zone ID:** zone-1770517752209
+- **Position:** (1000, 2900) to (2410, 4089)
+- **Purpose:** Work that was abandoned, blocked, or deemed not worth pursuing
+- **Workflow State:** abandoned
+- **Agent Behavior:**
+  - Mark as abandoned in memory
+  - Archive from active tracking
+  - Don't report in heartbeat checks (noise reduction)
+  - Record why it was abandoned for learning
+  - Clean up stale worktrees if filesystem_status is not "ready"
+  - These worktrees serve as historical record of what didn't work
 
 **Zone Trigger:** None (terminal state)
 
@@ -179,17 +268,33 @@ Pass in the context you think is more relevant to getting a good code review on 
 ## Workflow Transitions
 
 ```
-┌──────────────┐
-│  MAIN SESH   │  (Orchestrator control center)
-└──────────────┘
+                    ┌──────────────┐
+                    │  MAIN SESH   │  (Orchestrator - top of board)
+                    └──────────────┘
 
+HORIZONTAL FLOW (External/Direct Tasks):
 ┌──────────────────┐
-│ Agor Coding Tasks│  (Active development)
+│ Agor Coding Tasks│  (Direct implementation)
+└─────────┬────────┘
+          │
+          │
+          └──────────────────┐
+                             │
+VERTICAL FLOW (GitHub Issues):        │
+┌────────────────────┐                │
+│ Analyze GitHub     │                │
+│ Issue              │                │
+└─────────┬──────────┘                │
+          │                           │
+          ▼                           │
+┌──────────────────┐                  │
+│ Implement the    │──────────────────┘
+│ Plan             │
 └─────────┬────────┘
           │
           ▼
 ┌──────────────────────┐
-│ Create a pull request│  (Finalize & create PR)
+│ Create a pull request│  (Both flows converge)
 └─────────┬────────────┘
           │
           ├─────────────┐
@@ -204,13 +309,27 @@ Pass in the context you think is more relevant to getting a good code review on 
                     │
                     ▼
           ┌─────────────────┐
-          │      Done       │  (Merged or abandoned)
+          │  Done (merged)  │
+          └─────────────────┘
+
+          ┌─────────────────┐
+          │   Abandoned     │  (Can branch off from any zone)
           └─────────────────┘
 ```
 
-**Key decision point:** After "Create a pull request", use judgment to either:
-- → Codex review (complex/risky code)
-- → Human review (simple/confident changes)
+**Two Entry Points:**
+1. **External/Direct tasks** → "Agor Coding Tasks" (horizontal flow)
+2. **GitHub issues** → "Analyze GitHub Issue" → "Implement the Plan" (vertical flow)
+
+**Key decision points:**
+1. **Start:** Choose entry point based on task origin
+   - GitHub issue → Analyze GitHub Issue zone
+   - Direct request/idea → Agor Coding Tasks zone
+2. **After implementation:** Both flows converge at "Create a pull request"
+3. **After PR creation:** Use judgment to either:
+   - → Codex review (complex/risky code)
+   - → Human review (simple/confident changes)
+4. **Abandonment:** From any zone, if work is blocked/not worth pursuing → Abandoned zone
 
 ---
 
@@ -244,12 +363,15 @@ Pass in the context you think is more relevant to getting a good code review on 
    ```
 
 4. **Zone-based actions:**
-   - **"Agor Coding Tasks"**: Check for staleness (7+ days no activity)
+   - **"MAIN SESH"**: Check health of orchestrator
+   - **"Analyze GitHub Issue"**: Check if analysis is complete, ready to move to "Implement the Plan"
+   - **"Implement the Plan"**: Check if implementation complete, ready to move to "Create a pull request"
+   - **"Agor Coding Tasks"**: Check for staleness (7+ days no activity), ready for PR
    - **"Create a pull request"**: Check if PR exists, if not flag
    - **"Codex review"**: Check if review completed
    - **"Human review"**: Just report status, don't modify
-   - **"Done"**: Don't report (noise reduction)
-   - **"MAIN SESH"**: Check health of orchestrator
+   - **"Done"**: Don't report (noise reduction, terminal state)
+   - **"Abandoned"**: Don't report (noise reduction, terminal state)
 
 5. **Trust zone labels as source of truth for workflow state**
 
@@ -267,9 +389,17 @@ Pass in the context you think is more relevant to getting a good code review on 
    ```
 
 2. **Move to starting zone immediately:**
-   - **ALL coding tasks:** → "Agor Coding Tasks" zone (zone-1770144681071)
+   - **GitHub issues (with issue_url):** → "Analyze GitHub Issue" zone (zone-analyze-github-issue)
+   - **Direct coding tasks/external prompts:** → "Agor Coding Tasks" zone (zone-1770144681071)
    - **Orchestration/meta work:** → "MAIN SESH" zone (zone-1770143185072)
    ```typescript
+   // For GitHub issues
+   await agor.worktrees_set_zone({
+     worktreeId: wt.worktree_id,
+     zoneId: 'zone-analyze-github-issue',
+   });
+
+   // For direct tasks
    await agor.worktrees_set_zone({
      worktreeId: wt.worktree_id,
      zoneId: 'zone-1770144681071', // Agor Coding Tasks
@@ -290,5 +420,5 @@ Pass in the context you think is more relevant to getting a good code review on 
 
 ---
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-08
 **Board Owner:** Max (agorpg)

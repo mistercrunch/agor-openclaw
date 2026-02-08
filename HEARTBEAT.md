@@ -23,11 +23,39 @@ Add tasks below when you want periodic checks on Agor resources.
 
 FOR EACH worktree on your board:
 
-  IF zone_label = "Done: PR merged or worktree abandoned":
+  IF zone_label = "Done: PR merged":
+    → Skip (don't report, reduce noise)
+
+  IF zone_label = "Abandoned":
     → Skip (don't report, reduce noise)
 
   IF zone_label = "MAIN SESH":
     → Check health, ensure orchestrator is running properly
+
+  IF zone_label = "Analyze GitHub Issue":
+    → Get session for worktree (agor_sessions_get using worktree_id)
+    → Check session.status and last_message
+    → IF session is blocked/stuck:
+      → Review why (check last_message for errors, questions)
+      → IF unblockable without human: Flag for attention
+      → IF simple unblock: Prompt session to continue
+    → IF analysis complete (last_message indicates plan/design ready):
+      → Move to "Implement the Plan" zone WITH trigger:
+        agor_worktrees_set_zone(worktreeId, zone-1770517487066, triggerTemplate=true, targetSessionId)
+    → Check for PLAN.md or analysis document in worktree
+
+  IF zone_label = "Implement the Plan":
+    → Get session for worktree
+    → Check session.status and last_message
+    → IF session is blocked/stuck:
+      → Review why (check last_message for errors, questions)
+      → IF unblockable without human: Flag for attention, consider moving to "Abandoned"
+      → IF simple unblock: Prompt session to continue
+    → IF implementation complete (last_message indicates code done):
+      → Move to "Create a pull request" zone WITH trigger:
+        agor_worktrees_set_zone(worktreeId, zone-1770152350171, triggerTemplate=true, targetSessionId)
+    → IF work should be abandoned (blocked, not worth it):
+      → Move to "Abandoned" zone with notes explaining why
 
   IF zone_label = "Agor Coding Tasks":
     → Get session for worktree (agor_sessions_get using worktree_id)
@@ -67,8 +95,8 @@ FOR EACH worktree on your board:
 
   IF zone_label = "Human review":
     → MUST check PR status: gh pr view <pull_request_url> --json state,mergeable,reviews,comments
-    → IF merged: Move to "Done" zone IMMEDIATELY
-    → IF closed (not merged): Move to "Done" zone, note abandoned
+    → IF merged: Move to "Done: PR merged" zone IMMEDIATELY
+    → IF closed (not merged): Move to "Abandoned" zone with notes
     → IF requested changes: Flag for attention, may need to move back to "Agor Coding Tasks"
     → IF new comments from human: Flag for attention
     → IF approved but not merged: Just waiting, do nothing
@@ -82,9 +110,14 @@ END FOR EACH
 **See pseudocode above for detailed workflow by zone.**
 
 Additional checks:
-- Flag stale worktrees (no activity in >7 days) in "Agor Coding Tasks"
+- Flag stale worktrees (no activity in >7 days) in "Analyze GitHub Issue", "Implement the Plan", or "Agor Coding Tasks"
 - Identify worktrees with `needs_attention` flag
 - **Ignore worktrees on other boards** - not your responsibility
+
+**Zone Flow Summary:**
+- **GitHub Issue Path:** Analyze GitHub Issue → Implement the Plan → Create PR → (Codex/Human Review) → Done: PR merged
+- **Direct Task Path:** Agor Coding Tasks → Create PR → (Codex/Human Review) → Done: PR merged
+- **Abandonment:** From any zone → Abandoned (if blocked/not worth pursuing)
 
 ### Running Sessions (on your board)
 - Check for blocked/stuck sessions
